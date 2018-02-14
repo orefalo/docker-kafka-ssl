@@ -24,6 +24,18 @@ Verify the SSL connection
     openssl s_client -debug -connect localhost:9093 -tls1
 
 NOTE: This currently fails to verify the handshake.
+
+In the output of this command you should see server's certificate:
+
+```
+-----BEGIN CERTIFICATE-----
+{variable sized random bytes}
+-----END CERTIFICATE-----
+subject=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=Sriharsha Chintalapani
+issuer=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=kafka/emailAddress=test@test.com
+ ```
+
+
     
 Put some messages into Kafka    
     
