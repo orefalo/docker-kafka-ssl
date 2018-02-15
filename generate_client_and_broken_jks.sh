@@ -19,10 +19,10 @@ mkdir certs
 cd certs
 
 echo "Generating cert & key for the kafka broken..."
-keytool -keystore $SERVER_KEYSTORE_JKS -alias localhost -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "OU=None, O=None, L=Miami, S=FL, C=USA"
+keytool -keystore $SERVER_KEYSTORE_JKS -alias localhost -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=kafka.docker.ssl, OU=None, O=None, L=London, S=London, C=UK"
 
 echo "Generate a top level CA to stamp certificates"
-openssl req -new -x509 -keyout ca-key -out ca-cert -days $VALIDITY -passout pass:$PASSWORD -subj "/C=USA/S=FL/L=Miami/O=None/OU=None"
+openssl req -new -x509 -keyout ca-key -out ca-cert -days $VALIDITY -passout pass:$PASSWORD -subj "/C=UK/S=London/L=London/O=None/OU=None/CN=kafka.docker.ssl"
 
 echo "Import the CA in client & server trust stores"
 keytool -keystore $SERVER_TRUSTSTORE_JKS -alias CARoot -import -file ca-cert -storepass $PASSWORD -noprompt
@@ -39,8 +39,17 @@ echo "Import Signed Cert into broker keystore"
 keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file ca-cert -storepass $PASSWORD -noprompt
 keytool -keystore $SERVER_KEYSTORE_JKS -alias localhost -import -file cert-signed -storepass $PASSWORD -noprompt
 
+
+
+
+#keytool -keystore kafka.client.keystore.jks -alias localhost -certreq -file cert-file
+#openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
+#keytool -keystore kafka.client.keystore.jks -alias CARoot -import -file ca-cert
+#keytool -keystore kafka.client.keystore.jks -alias localhost -import -file cert-signed
+
+
 echo "Now generate the client cert & key"
-keytool -keystore $CLIENT_KEYSTORE_JKS -alias localhost -validity $VALIDITY -genkey -storepass $PASSWORD -dname "OU=Qv, O=Qv, L=Miami, S=FL, C=USA"
+keytool -keystore $CLIENT_KEYSTORE_JKS -alias localhost -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD -dname "CN=kafka.docker.ssl, OU=None, O=None, L=London, S=London, C=UK"
 echo "1"
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias localhost -certreq -file cert-file -storepass $PASSWORD -noprompt
 echo "2"

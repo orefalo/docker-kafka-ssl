@@ -1,6 +1,8 @@
 # docker-kafka-ssl
 
-Playing with SSL enabeled Kafka in Docker.
+Enables 2 ways SSL communication on Kafka.
+
+Certificates are selfsigned with a master CA, one for the broker, the other for the client.
 
 ## Requirements
 
@@ -10,6 +12,10 @@ Playing with SSL enabeled Kafka in Docker.
 * docker-compose
 
 ## Instructions
+
+add to your /etc/hosts
+
+    127.0.0.1 kafka.docker.ssl
 
 Generate the required certificates and keystores:
 
@@ -23,9 +29,7 @@ Verify the SSL connection
 
     openssl s_client -debug -connect localhost:9093 -tls1
 
-NOTE: This currently fails to verify the handshake.
-
-In the output of this command you should see server's certificate:
+In the output of this command you should see server's certificate, such as:
 
 ```
 -----BEGIN CERTIFICATE-----
@@ -33,15 +37,10 @@ In the output of this command you should see server's certificate:
 -----END CERTIFICATE-----
 subject=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=Sriharsha Chintalapani
 issuer=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=kafka/emailAddress=test@test.com
- ```
+```
 
 
     
 Put some messages into Kafka    
     
     echo "Something" | kafkacat -P -b 127.0.0.1:9092 -t test -X security.protocol=ssl -X ssl.key.location=./certs/docker.kafka.server.keystore.pem
-
-## References
-
-* http://docs.confluent.io/2.0.0/kafka/ssl.html#configuring-kafka-brokers
-* https://www.confluent.io/blog/apache-kafka-security-authorization-authentication-encryption/
