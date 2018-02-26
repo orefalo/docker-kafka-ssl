@@ -43,14 +43,14 @@ echo -e "${GREEN}Generating cert & key for the kafka Client...${NC}"
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US"
 
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
-openssl req -new -x509 -keyout ca-hw-key -out ca-hw-cert -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
+openssl req -new -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
 
 echo -e "${GREEN}Generate a top level client CA to stamp server certificates${NC}"
-openssl req -new -x509 -keyout ca-qv-key -out ca-qv-cert -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Qv/OU=None/CN=$CLIENT_HOSTNAME"
+openssl req -new -x509 -keyout $CLIENT_CA_KEY -out $CLIENT_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Qv/OU=None/CN=$CLIENT_HOSTNAME"
 
 echo -e "${GREEN}Import the CA in their respective trust stores${NC}"
-keytool -keystore $SERVER_TRUSTSTORE_JKS -alias CARoot -import -file ca-qv-cert -storepass $PASSWORD -noprompt
-keytool -keystore $CLIENT_TRUSTSTORE_JKS -alias CARoot -import -file ca-hw-cert -storepass $PASSWORD -noprompt
+keytool -keystore $SERVER_TRUSTSTORE_JKS -alias CARoot -import -file $CLIENT_CA_CERT -storepass $PASSWORD -noprompt
+keytool -keystore $CLIENT_TRUSTSTORE_JKS -alias CARoot -import -file $SERVER_CA_CERT -storepass $PASSWORD -noprompt
 
 # At this point we have two jks TrustStore
 #  hw server trust store contains CA ROOT ca-qv-cert
@@ -68,18 +68,18 @@ echo -e "${GREEN}Sign Server with Client CA${NC}"
 rm cert-file
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -certreq -file cert-file -storepass $PASSWORD -noprompt
 # Sign it
-openssl x509 -req -CA ca-qv-cert -CAkey ca-qv-key -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
+openssl x509 -req -CA $CLIENT_CA_CERT -CAkey $CLIENT_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
 # Finally, you need to import both the certificate of the CA and the signed certificate into the keystore
-keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file ca-qv-cert -storepass $PASSWORD -noprompt
+keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file $CLIENT_CA_CERT -storepass $PASSWORD -noprompt
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -import -file cert-signed -storepass $PASSWORD -noprompt
 
 echo -e "${GREEN}Sign Client with Server CA${NC}"
 rm cert-file
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -certreq -file cert-file -storepass $PASSWORD -noprompt
 # Sign it
-openssl x509 -req -CA ca-hw-cert -CAkey ca-hw-key -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
+openssl x509 -req -CA $SERVER_CA_CERT -CAkey $SERVER_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
 # Finally, you need to import both the certificate of the CA and the signed certificate into the keystore
-keytool -keystore $CLIENT_KEYSTORE_JKS -alias CARoot -import -file ca-hw-cert -storepass $PASSWORD -noprompt
+keytool -keystore $CLIENT_KEYSTORE_JKS -alias CARoot -import -file $SERVER_CA_CERT -storepass $PASSWORD -noprompt
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -import -file cert-signed -storepass $PASSWORD -noprompt
 
 
