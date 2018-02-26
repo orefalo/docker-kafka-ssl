@@ -22,9 +22,12 @@ SERVER_HOSTNAME="kafka.docker.ssl"
 SERVER_CA_CERT="ca-hw-cert"
 SERVER_CA_KEY="ca-hw-key"
 
-CLIENT_CA_CERT="ca-qv-cert"
-CLIENT_CA_KEY="ca-qv-key"
+#CLIENT_CA_CERT="ca-qv-cert"
+#CLIENT_CA_KEY="ca-qv-key"
 
+# IMPORTANT: Kafka 2 ways SSL only works with ONE CA ROOT!!
+CLIENT_CA_CERT=$SERVER_CA_CERT
+CLIENT_CA_KEY=$SERVER_CA_KEY
 
 echo "Clearing existing Kafka SSL certs..."
 rm -rf certs
@@ -34,7 +37,6 @@ mkdir certs
 
 cd certs
 
-# IMPORTANT: Kafka 2 way SSL only works with ONE CA ROOT!!
 
 echo -e "${GREEN}Generating cert & key for the kafka Server...${NC}"
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US"
@@ -45,8 +47,9 @@ keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
 openssl req -new -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
 
-echo -e "${GREEN}Generate a top level client CA to stamp server certificates${NC}"
-openssl req -new -x509 -keyout $CLIENT_CA_KEY -out $CLIENT_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Qv/OU=None/CN=$CLIENT_HOSTNAME"
+# IMPORTANT: Kafka 2 ways SSL only works with ONE CA ROOT!!
+#echo -e "${GREEN}Generate a top level client CA to stamp server certificates${NC}"
+#openssl req -new -x509 -keyout $CLIENT_CA_KEY -out $CLIENT_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Qv/OU=None/CN=$CLIENT_HOSTNAME"
 
 echo -e "${GREEN}Import the CA in their respective trust stores${NC}"
 keytool -keystore $SERVER_TRUSTSTORE_JKS -alias CARoot -import -file $CLIENT_CA_CERT -storepass $PASSWORD -noprompt
