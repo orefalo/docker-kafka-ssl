@@ -15,25 +15,25 @@ services:
         protocol: tcp
         mode: host
     environment:
-
       HOSTNAME_COMMAND: "docker info | grep ^Name: | cut -d' ' -f 2"      
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:SSL
       KAFKA_ADVERTISED_PROTOCOL_NAME: OUTSIDE
+      KAFKA_ADVERTISED_HOST_NAME: 'kafka.docker.ssl'
+      KAFKA_BROKER_ID: 999
       KAFKA_ADVERTISED_PORT: 9094
       KAFKA_PROTOCOL_NAME: INSIDE
       KAFKA_PORT: 9092
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
       KAFKA_CREATE_TOPICS: "test:1:1"
-
       KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-      
       KAFKA_SSL_KEYSTORE_LOCATION: '/certs/docker.kafka.server.keystore.jks'
       KAFKA_SSL_KEYSTORE_PASSWORD: 'kafkadocker'
       KAFKA_SSL_KEY_PASSWORD: 'kafkadocker'
       KAFKA_SSL_TRUSTSTORE_LOCATION: '/certs/docker.kafka.server.truststore.jks'
       KAFKA_SSL_TRUSTSTORE_PASSWORD: 'kafkadocker'
       KAFKA_SSL_CLIENT_AUTH: 'required'
+      LOG4J_LOGGER_KAFKA_AUTHORIZER_LOGGER: 'DEBUG, authorizerAppender'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./certs:/certs
