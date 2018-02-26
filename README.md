@@ -4,6 +4,8 @@ Enables 2 ways SSL communication on Kafka.
 
 Certificates are selfsigned with a master CA, one for the broker, the other for the client.
 
+Port 9094 is 2 ways SSL protected and encrypted
+
 ## Requirements
 
 * openssl
@@ -27,7 +29,7 @@ Run Kafka and Zookeeper
 
 Verify the SSL connection
 
-    openssl s_client -debug -connect localhost:9093 -tls1
+    openssl s_client -debug -connect localhost:9094 -tls1
 
 In the output of this command you should see server's certificate, such as:
 

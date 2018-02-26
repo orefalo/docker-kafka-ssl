@@ -37,3 +37,4 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./certs:/certs
+      - ./client_ssl.properties:/certs/client_ssl.properties

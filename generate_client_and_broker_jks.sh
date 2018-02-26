@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# 2 ways SSL generation
+#
 # References:
 # http://docs.confluent.io/2.0.0/kafka/ssl.html
 # 
@@ -39,14 +42,10 @@ echo "Import Signed Cert into broker keystore"
 keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file ca-cert -storepass $PASSWORD -noprompt
 keytool -keystore $SERVER_KEYSTORE_JKS -alias localhost -import -file cert-signed -storepass $PASSWORD -noprompt
 
-
-
-
 #keytool -keystore kafka.client.keystore.jks -alias localhost -certreq -file cert-file
 #openssl x509 -req -CA ca-cert -CAkey ca-key -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
 #keytool -keystore kafka.client.keystore.jks -alias CARoot -import -file ca-cert
 #keytool -keystore kafka.client.keystore.jks -alias localhost -import -file cert-signed
-
 
 echo "Now generate the client cert & key"
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias localhost -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD -dname "CN=kafka.docker.ssl, OU=None, O=None, L=London, S=London, C=UK"
