@@ -85,6 +85,9 @@ openssl x509 -req -CA $SERVER_CA_CERT -CAkey $SERVER_CA_KEY -in cert-file -out c
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias CARoot -import -file $SERVER_CA_CERT -storepass $PASSWORD -noprompt
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -import -file cert-signed -storepass $PASSWORD -noprompt
 
+# PEM for KafkaCat client (optional)
+keytool -importkeystore -srckeystore $SERVER_KEYSTORE_JKS -destkeystore $SERVER_KEYSTORE_P12 -srcstoretype JKS -deststoretype PKCS12 -srcstorepass $PASSWORD -deststorepass $PASSWORD -noprompt
+openssl pkcs12 -in $SERVER_KEYSTORE_P12 -out $SERVER_KEYSTORE_PEM -nodes -passin pass:$PASSWORD
 
 chmod 700 *
 )

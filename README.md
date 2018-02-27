@@ -13,7 +13,7 @@ Port 9094 is 2 ways SSL client authenticated and encrypted.
 * docker
 * docker-compose
 
-## Instructions
+## Setup Instructions
 
 add to your /etc/hosts
 
@@ -41,7 +41,28 @@ subject=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=Sriharsha Chintalapani
 issuer=/C=US/ST=CA/L=Santa Clara/O=org/OU=org/CN=kafka/emailAddress=test@test.com
 ```
 
+## Generte some messages
     
-Put some messages into Kafka    
-    
+Pick the client of your choice
+
+### Local
+
+```
+cd clients/local  
 ./local_producer.sh
+```
+
+### docker
+
+```
+cd clients/docker  
+./producer.sh
+```
+
+### node
+
+```
+cd clients/node
+npm i  
+node index.js
+```
