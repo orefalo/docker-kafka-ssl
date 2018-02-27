@@ -17,7 +17,7 @@
 			closeProducer();
 		});
 		producer.on('delivery-report', function(report) {
-			// console.log(report);
+		    console.log(report);
 		});
 		producerReady = new Promise(function(resolve, reject) {
 			producer.on('ready', function() {
@@ -29,15 +29,19 @@
 	var initializeProducer = function() {
 		producer = new kafka.Producer({
 		    'client.id': 'kafka',
-		    'metadata.broker.list': 'localhost:9092',
-		    'compression.codec': 'gzip',
+		    'metadata.broker.list': 'kafka.docker.ssl:9094',
 		    'retry.backoff.ms': 200,
 		    'message.send.max.retries': 10,
 		    'socket.keepalive.enable': true,
 		    'queue.buffering.max.messages': 100000,
-	            'queue.buffering.max.ms': 1000,
+	        'queue.buffering.max.ms': 1000,
 		    'batch.num.messages': 1000000,
-		    'dr_cb': true
+		    'dr_cb': true,
+		    'security.protocol': 'ssl',
+		    'ssl.ca.location': '../../certs/ca-hw-cert',
+		    'ssl.certificate.location': '../../certs/client.pem',
+		    'ssl.key.location': '../../certs/client.key',
+		    'ssl.key.password': 'kafkadocker'
 		});
 
 		producer.connect({}, function(err) {

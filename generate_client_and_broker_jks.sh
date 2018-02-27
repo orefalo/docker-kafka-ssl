@@ -11,6 +11,7 @@ NC='\033[0m' # No Color
 
 PASSWORD="kafkadocker"
 CLIENT_KEYSTORE_JKS="docker.kafka.client.keystore.jks"
+CLIENT_KEYSTORE_P12="docker.kafka.client.keystore.p12"
 SERVER_KEYSTORE_JKS="docker.kafka.server.keystore.jks"
 SERVER_TRUSTSTORE_JKS="docker.kafka.server.truststore.jks"
 CLIENT_TRUSTSTORE_JKS="docker.kafka.client.truststore.jks"
@@ -39,10 +40,10 @@ cd certs
 
 
 echo -e "${GREEN}Generating cert & key for the kafka Server...${NC}"
-keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US"
+keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US" -keyalg RSA -keysize 2048
 
 echo -e "${GREEN}Generating cert & key for the kafka Client...${NC}"
-keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US"
+keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US" -keyalg RSA -keysize 2048
 
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
 openssl req -new -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
@@ -68,7 +69,7 @@ keytool -keystore $CLIENT_TRUSTSTORE_JKS -alias CARoot -import -file $SERVER_CA_
 
 # For this, we first need to export the cert for each client on file system
 echo -e "${GREEN}Sign Server with Client CA${NC}"
-rm cert-file
+rm -f cert-file
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -certreq -file cert-file -storepass $PASSWORD -noprompt
 # Sign it
 openssl x509 -req -CA $CLIENT_CA_CERT -CAkey $CLIENT_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
@@ -77,7 +78,7 @@ keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file $CLIENT_CA_CE
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -import -file cert-signed -storepass $PASSWORD -noprompt
 
 echo -e "${GREEN}Sign Client with Server CA${NC}"
-rm cert-file
+rm -f cert-file
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -certreq -file cert-file -storepass $PASSWORD -noprompt
 # Sign it
 openssl x509 -req -CA $SERVER_CA_CERT -CAkey $SERVER_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD
@@ -86,8 +87,11 @@ keytool -keystore $CLIENT_KEYSTORE_JKS -alias CARoot -import -file $SERVER_CA_CE
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -import -file cert-signed -storepass $PASSWORD -noprompt
 
 # PEM for KafkaCat client (optional)
-keytool -importkeystore -srckeystore $SERVER_KEYSTORE_JKS -destkeystore $SERVER_KEYSTORE_P12 -srcstoretype JKS -deststoretype PKCS12 -srcstorepass $PASSWORD -deststorepass $PASSWORD -noprompt
-openssl pkcs12 -in $SERVER_KEYSTORE_P12 -out $SERVER_KEYSTORE_PEM -nodes -passin pass:$PASSWORD
+# Extract key (pem) from client JKS, this take a transition state via a pkcs12
+keytool -importkeystore -srckeystore $CLIENT_KEYSTORE_JKS -destkeystore $CLIENT_KEYSTORE_P12 -srcstoretype JKS -deststoretype PKCS12 -srcstorepass $PASSWORD -deststorepass $PASSWORD -noprompt
+openssl pkcs12 -in $CLIENT_KEYSTORE_P12 -nocerts -nodes -passin pass:$PASSWORD | openssl rsa -out client.key 
+openssl pkcs12 -in $CLIENT_KEYSTORE_P12 -nokeys -clcerts -nodes -passin pass:$PASSWORD | openssl x509 -out client.pem
+openssl pkcs12 -in $CLIENT_KEYSTORE_P12 -nokeys -cacerts -nodes -passin pass:$PASSWORD | grep -v -e '^\s' | grep -v '^\(Bag\|subject\|issuer\)' > client.ca-bundle.crt
 
 chmod 700 *
 )
