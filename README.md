@@ -74,7 +74,7 @@ node index.js
 
 ```
 ssl.truststore.location=/var/private/ssl/kafka.server.truststore.jks
-ssl.truststore.password=test1234
+ssl.truststore.password=kafkadocker
 ssl.keystore.location=/var/private/ssl/kafka.server.keystore.jks
 ssl.keystore.password=kafkadocker
 ssl.key.password=kafkadocker
