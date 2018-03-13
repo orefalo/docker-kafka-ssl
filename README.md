@@ -66,3 +66,30 @@ cd clients/node
 npm i  
 node index.js
 ```
+
+
+## Kafka implicit configurations
+
+### Server
+
+```
+ssl.truststore.location=/var/private/ssl/kafka.server.truststore.jks
+ssl.truststore.password=test1234
+ssl.keystore.location=/var/private/ssl/kafka.server.keystore.jks
+ssl.keystore.password=kafkadocker
+ssl.key.password=kafkadocker
+ssl.client.auth=required
+
+```
+
+### Client
+
+```
+security.protocol=SSL
+ssl.truststore.location=/certs/docker.kafka.client.truststore.jks
+ssl.truststore.password=kafkadocker
+ssl.keystore.location=/certs/docker.kafka.client.keystore.jks
+ssl.keystore.password=kafkadocker
+ssl.key.password=kafkadocker
+```
+
