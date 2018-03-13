@@ -16,6 +16,7 @@ SERVER_KEYSTORE_JKS="docker.kafka.server.keystore.jks"
 SERVER_TRUSTSTORE_JKS="docker.kafka.server.truststore.jks"
 CLIENT_TRUSTSTORE_JKS="docker.kafka.client.truststore.jks"
 VALIDITY=1825
+KEYLEN=512
 
 CLIENT_HOSTNAME="localhost"
 SERVER_HOSTNAME="kafka.docker.ssl"
@@ -40,10 +41,10 @@ cd certs
 
 
 echo -e "${GREEN}Generating cert & key for the kafka Server...${NC}"
-keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US" -keyalg RSA -keysize 2048
+keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US" -keyalg RSA -keysize $KEYLEN
 
 echo -e "${GREEN}Generating cert & key for the kafka Client...${NC}"
-keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US" -keyalg RSA -keysize 2048
+keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD -keypass $PASSWORD  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US" -keyalg RSA -keysize $KEYLEN
 
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
 openssl req -new -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
