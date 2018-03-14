@@ -21,7 +21,7 @@ var producer = new Kafka.Producer({
 		    'ssl.ca.location': '../../certs/client.ca-bundle.crt',
 		    'ssl.certificate.location': '../../certs/client.pem',
 		    'ssl.key.location': '../../certs/client.key',
-		    'ssl.key.password': 'kafkadocker',
+		    'ssl.key.password': 'kafkadockerclient',
 		});
 
 producer.connect({}, function(err) {

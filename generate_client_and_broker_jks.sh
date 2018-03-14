@@ -12,7 +12,7 @@ NC='\033[0m' # No Color
 PASSWORD_CLIENT="kafkadockerclient"
 PASSWORD_SERVER="kafkadockerserver"
 
-PASSWORD_CA="kafkadockerserver"
+PASSWORD_CA="1234"
 
 # name of files
 CLIENT_KEYSTORE_JKS="docker.kafka.client.keystore.jks"
@@ -54,7 +54,7 @@ echo -e "${GREEN}Generating cert & key for the kafka Client...${NC}"
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD_CLIENT -keypass $PASSWORD_CLIENT  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US" -keyalg RSA -keysize $KEYLEN
 
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
-openssl req -new -newkey rsa:$KEYLEN -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD_SERVER -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
+openssl req -new -newkey rsa:$KEYLEN -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD_CA -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
 
 # IMPORTANT: Kafka 2 ways SSL only works with ONE CA ROOT!!
 #echo -e "${GREEN}Generate a top level client CA to stamp server certificates${NC}"
@@ -80,7 +80,7 @@ echo -e "${GREEN}Sign Server with Client CA${NC}"
 rm -f cert-file
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -certreq -file cert-file -storepass $PASSWORD_SERVER -noprompt
 # Sign it
-openssl x509 -req -CA $CLIENT_CA_CERT -CAkey $CLIENT_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD_SERVER
+openssl x509 -req -CA $CLIENT_CA_CERT -CAkey $CLIENT_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD_CA
 # Finally, you need to import both the certificate of the CA and the signed certificate into the keystore
 keytool -keystore $SERVER_KEYSTORE_JKS -alias CARoot -import -file $CLIENT_CA_CERT -storepass $PASSWORD_SERVER -noprompt
 keytool -keystore $SERVER_KEYSTORE_JKS -alias server -import -file cert-signed -storepass $PASSWORD_SERVER -noprompt
@@ -91,7 +91,7 @@ echo -e "${GREEN}Sign Client with Server CA${NC}"
 rm -f cert-file
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -certreq -file cert-file -storepass $PASSWORD_CLIENT -noprompt
 # Sign it
-openssl x509 -req -CA $SERVER_CA_CERT -CAkey $SERVER_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD_SERVER
+openssl x509 -req -CA $SERVER_CA_CERT -CAkey $SERVER_CA_KEY -in cert-file -out cert-signed -days $VALIDITY -CAcreateserial -passin pass:$PASSWORD_CA
 # Finally, you need to import both the certificate of the CA and the signed certificate into the keystore
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias CARoot -import -file $SERVER_CA_CERT -storepass $PASSWORD_CLIENT -noprompt
 keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -import -file cert-signed -storepass $PASSWORD_CLIENT -noprompt
