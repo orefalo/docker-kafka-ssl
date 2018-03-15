@@ -48,13 +48,13 @@ cd certs
 
 
 echo -e "${GREEN}Generating cert & key for the kafka Server...${NC}"
-keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD_SERVER -keypass $PASSWORD_SERVER  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, S=Miami, C=US" -keyalg RSA -keysize $KEYLEN
+keytool -keystore $SERVER_KEYSTORE_JKS -alias server -validity $VALIDITY -genkey -storepass $PASSWORD_SERVER -keypass $PASSWORD_SERVER  -dname "CN=$SERVER_HOSTNAME, OU=None, O=Hw, L=Miami, ST=Florida, C=US" -keyalg RSA -keysize $KEYLEN
 
 echo -e "${GREEN}Generating cert & key for the kafka Client...${NC}"
-keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD_CLIENT -keypass $PASSWORD_CLIENT  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, S=Miami, C=US" -keyalg RSA -keysize $KEYLEN
+keytool -keystore $CLIENT_KEYSTORE_JKS -alias client -validity $VALIDITY -genkey -storepass $PASSWORD_CLIENT -keypass $PASSWORD_CLIENT  -dname "CN=$CLIENT_HOSTNAME, OU=None, O=Qv, L=Miami, ST=Florida, C=US" -keyalg RSA -keysize $KEYLEN
 
 echo -e "${GREEN}Generate a top level server CA to stamp client certificates${NC}"
-openssl req -new -newkey rsa:$KEYLEN -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD_CA -subj "/C=US/S=Miami/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
+openssl req -new -newkey rsa:$KEYLEN -x509 -keyout $SERVER_CA_KEY -out $SERVER_CA_CERT -days $VALIDITY -passout pass:$PASSWORD_CA -subj "/C=US/ST=Florida/L=Miami/O=Hw/OU=None/CN=$SERVER_HOSTNAME"
 
 # IMPORTANT: Kafka 2 ways SSL only works with ONE CA ROOT!!
 #echo -e "${GREEN}Generate a top level client CA to stamp server certificates${NC}"
