@@ -39,12 +39,12 @@ CLIENT_CA_CERT=$SERVER_CA_CERT
 CLIENT_CA_KEY=$SERVER_CA_KEY
 
 echo "Clearing existing Kafka SSL certs..."
-rm -rf certs
-mkdir certs
+rm -rf sslcerts
+mkdir sslcerts
 
 (
 
-cd certs
+cd sslcerts
 
 
 echo -e "${GREEN}Generating cert & key for the kafka Server...${NC}"
